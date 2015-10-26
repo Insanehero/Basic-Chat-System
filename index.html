@@ -1,0 +1,141 @@
+<DOCTYPE! html>
+<html>
+<head>
+	<link rel="stylesheet" href='style.css'>
+</head>
+<body>
+Username <input type="text" id="username">
+<button id="confirmName">Set username</button>
+<div id="chatBox">
+	<div id="sideBar">
+		<div>Online Users: <span id='userCount'></span></div>
+		<div id="onlineUsers"></div>
+	</div>
+	<div id="chatMessages">
+		<div id="chat">
+			<div class='message'>
+			</div>
+		</div>
+	</div>
+	<div id="chatBar">
+		<input type="text" id="text">
+		<button id="send">Send Message</button>
+	</div>
+</div>
+
+</body>
+</html>
+<script>
+var ws = new WebSocket('ws://localhost:3002', 'echo-protocol');
+var clientID = null;
+
+ws.onmessage = function(e) {
+	var data = JSON.parse(e.data);
+
+	switch (data.type) {
+		case 'id':
+			clientID = data.content.id;
+			break;
+		case 'message':
+			addChatMessage(data);
+			break;
+		case 'onlineUsers':
+			updateUsers(data);
+			break;
+	}
+}
+
+var connected = false;
+ws.onopen = function(event) {
+	connected = true;
+}
+
+function Message (type, content) {
+	this.type = type;
+	this.content = content;
+}
+
+function sendMessage (msg) {
+	if (!(connected || clientID))
+		return false;
+
+	if (msg) {
+		ws.send(JSON.stringify(msg));
+		if (msg.type == 'message')
+			document.getElementById('text').value = "";
+	}
+}
+
+function createElt (type, className) {
+	var elt = document.createElement(type);
+	if (className) elt.className = className;
+	return elt;
+}
+
+function updateUsers(data) {
+	var userBox = document.getElementById('onlineUsers');
+	var countElt = document.getElementById('userCount');
+	userBox.innerHTML = "";
+	var userCount = data.content.users.length;
+	countElt.textContent = userCount;
+	data.content.users.forEach(function(user) {
+		if (user) {
+			userBox.innerHTML += "<br>" + user;
+		}
+	})
+}
+
+function addChatMessage(data) {
+	var chatBox = document.getElementById('chat');
+	var messageBox = createElt('div', 'message');
+	var username = createElt('span', 'messageUsername');
+	var message = createElt('span', 'messageText');
+	var date = createElt('span', 'messageDate');
+
+	username.textContent = data.content.username;
+	message.textContent = data.content.text;
+	date.textContent = timeSet(new Date(data.content.date));
+
+	function timeSet (date) {
+		var timeStatus = "AM";
+		var hours = date.getHours()
+		var minutes = date.getMinutes();
+		if (minutes < 10)
+			minutes = "0" + minutes;
+		if (hours > 11) {
+			if (hours > 12)
+				hours = hours % 12;
+			timeStatus = "PM";
+		}
+		return hours + ":" + minutes + " " + timeStatus;
+	}
+
+	if (data.content.id == clientID) {
+		messageBox.style.backgroundColor = 'lightgreen';
+	}
+
+	messageBox.appendChild(username);
+	messageBox.appendChild(message);
+	messageBox.appendChild(date);
+
+
+	chatBox.appendChild(messageBox);
+}
+
+var button = document.getElementById('send');
+var usernameButton = document.getElementById('confirmName');
+
+usernameButton.addEventListener('click', function(e) {
+	var username = document.getElementById('username');
+	if (username.value.length > 5)
+		sendMessage(new Message('username', {id: clientID, username: username.value}));
+})
+
+button.addEventListener('click', function(e) {
+	var text = document.getElementById('text');
+	if (text.value.length > 0)
+		sendMessage(new Message('message', {id: clientID, text: text.value, date: Date.now()}));
+})
+</script>
+</body>
+</html>
