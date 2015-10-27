@@ -6,6 +6,21 @@
 	height: 30px;
 	width: 550px;
 	margin-bottom: 3px;
+	background-color: pink;
+}
+
+#alert {
+	margin-top: 10px;
+	width: 700px;
+	height: 40px;
+	background: #FFF2AA;
+	color: red;
+	font-weight: bold;
+	border-radius: 10px;
+	line-height: 40px;
+	border: 2px solid #D4C56A;
+	text-align: center;
+	display: none;
 }
 
 #chat {
@@ -18,11 +33,17 @@
 .messageText {
 	padding-left: 30px;
 	padding-right: 30px;
+
 }
 
 .messageUsername {
+	color: #fff;
 	margin-left: 10px;
 	font-weight: bold;
+	border-radius: 7px;
+	background: rgb(200, 100, 100);
+	width: 40px;
+	height: 15px;
 }
 
 .messageDate {
@@ -42,12 +63,14 @@
 	border-radius: 10px;
 	width: 375px;
 	height: 30px;
+	padding-left: 5px;
+	padding-right: 5px;
 	margin-left: 35px;
 	margin-top: 5px;
 }
 
 #send {
-	height: 30px; 
+	height: 30px;
 }
 
 #chatBox {
@@ -62,7 +85,7 @@
 	width: 550px;
 	height: 450px;
 	background-color: lightgrey;
- 
+
 }
 
 #sideBar {

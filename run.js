@@ -1,7 +1,7 @@
 var http = require('http');
 var WebSocketServer = require('websocket').server
 var server = http.createServer(function(request, response) {
-	
+
 });
 
 function httpPort(portn) {
@@ -67,8 +67,10 @@ function updateOnlineUsers(interval) {
 		}
 		var keys = Object.keys(clients);
 		if (keys.length > 0) {
-			var users = keys.map(function(id) {
-				return clients[id].username || "";
+			var users = keys.filter(function(id) {
+				return clients[id].username;
+			}).map(function(id) {
+				return clients[id].username;
 			})
 			wsSendData('all', new Message('onlineUsers', {users: users}));
 		}

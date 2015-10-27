@@ -13,14 +13,13 @@ Username <input type="text" id="username">
 	</div>
 	<div id="chatMessages">
 		<div id="chat">
-			<div class='message'>
-			</div>
 		</div>
 	</div>
 	<div id="chatBar">
 		<input type="text" id="text">
 		<button id="send">Send Message</button>
 	</div>
+	<div id='alert'></div>
 </div>
 
 </body>
@@ -28,6 +27,7 @@ Username <input type="text" id="username">
 <script>
 var ws = new WebSocket('ws://localhost:3002', 'echo-protocol');
 var clientID = null;
+var clientUsername = null;
 
 ws.onmessage = function(e) {
 	var data = JSON.parse(e.data);
@@ -127,15 +127,45 @@ var usernameButton = document.getElementById('confirmName');
 
 usernameButton.addEventListener('click', function(e) {
 	var username = document.getElementById('username');
-	if (username.value.length > 5)
+	if (username.value.length >= 6) {
 		sendMessage(new Message('username', {id: clientID, username: username.value}));
+		clientUsername = username.value;
+	}
 })
 
 button.addEventListener('click', function(e) {
-	var text = document.getElementById('text');
-	if (text.value.length > 0)
-		sendMessage(new Message('message', {id: clientID, text: text.value, date: Date.now()}));
-})
+	if (clientUsername) {
+		var text = document.getElementById('text');
+		if (text.value.length > 0)
+			sendMessage(new Message('message', {id: clientID, text: text.value, date: Date.now()}));
+	} else {
+		var alertElt = document.getElementById('alert');
+		var style = window.getComputedStyle(alertElt);
+		if (style.getPropertyValue('display') == 'none') {
+			alertElt.textContent = 'Enter a username!';
+			alertElt.style.display = 'block';
+			setTimeout(function() {
+				fadeAnimation(alertElt, 1000);
+			}, 1000);
+		}
+	}
+});
+
+function fadeAnimation (ele, time) {
+	var interval = Math.floor(time / 20); //time in miliseconds
+	var level = 1.0;
+	var rate = 1.0 / 20;
+	intervalID = setInterval(function() {
+		level -= rate;
+		ele.style.opacity = String(level);
+		if (level < 0 ) {
+			clearInterval(intervalID);
+			ele.style.display = 'none';
+			ele.style.opacity = '1.0';
+		}
+	}, interval);
+}
+
 </script>
 </body>
 </html>
